@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ランダム俳句ジェネレーター</title>
+  <script type="module" crossorigin src="/random-haiiku/assets/index-BpEdRJQV.js"></script>
+  <link rel="stylesheet" crossorigin href="/random-haiiku/assets/index-DyBch9_W.css">
+</head>
+<body>
+    <div class="container">
+        <h1>ランダム俳句ジェネレーター</h1>
+
+        <!-- ルーム選択セクション -->
+        <section class="room-selector" id="room-selector">
+            <h2>ルームを選択</h2>
+            <div class="room-input-group">
+                <label for="room-id-input">ルーム番号:</label>
+                <input type="text" id="room-id-input" placeholder="例: 1234" maxlength="6">
+                <button onclick="joinRoom()" class="join-btn">ルームに参加</button>
+            </div>
+            <p class="room-hint">同じルーム番号を入力すると、みんなで言葉を共有できます</p>
+        </section>
+
+        <!-- 現在のルーム情報 -->
+        <div class="current-room-info" id="current-room-info" style="display: none;">
+            <p>現在のルーム: <span id="current-room-number"></span></p>
+            <button onclick="leaveRoom()" class="leave-btn">ルームを変更</button>
+        </div>
+
+        <!-- 俳句生成セクション -->
+        <section class="haiku-generator">
+            <h2>俳句を生成</h2>
+            <button onclick="generateHaiku()" class="generate-btn">ランダム俳句を作る</button>
+
+            <div class="haiku-display" id="haiku-display">
+                <p class="haiku-line" id="line-1">―</p>
+                <p class="haiku-line" id="line-2">―</p>
+                <p class="haiku-line" id="line-3">―</p>
+            </div>
+        </section>
+
+        <!-- 言葉の管理セクション -->
+        <section class="word-manager">
+            <h2>言葉を追加</h2>
+
+            <div class="input-group">
+                <label for="word-input">言葉:</label>
+                <input type="text" id="word-input" placeholder="例: 春の海">
+
+                <label for="syllable-type">文字数:</label>
+                <select id="syllable-type">
+                    <option value="5">5文字</option>
+                    <option value="7">7文字</option>
+                </select>
+
+                <button onclick="addWord()">追加</button>
+            </div>
+
+            <div class="action-buttons">
+                <button onclick="addDefaultWords()" class="action-btn default-btn">デフォルトの言葉を追加</button>
+                <button onclick="clearAllWords()" class="action-btn clear-btn">すべて削除</button>
+                <button onclick="resetUsedWords()" class="action-btn reset-btn">使用済みをリセット</button>
+                <button onclick="toggleWordLists()" class="action-btn toggle-btn" id="toggle-btn">言葉リストを表示</button>
+            </div>
+
+            <div class="word-lists" id="word-lists">
+                <div class="word-list">
+                    <h3>5文字</h3>
+                    <ul id="words-5" class="word-list-content hidden"></ul>
+                </div>
+
+                <div class="word-list">
+                    <h3>7文字</h3>
+                    <ul id="words-7" class="word-list-content hidden"></ul>
+                </div>
+            </div>
+        </section>
+    </div>
+
+</body>
+</html>
