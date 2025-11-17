@@ -393,17 +393,64 @@ button:active {
     background: linear-gradient(135deg, #f57c00 0%, #e65100 100%);
 }
 
+/* タブレット向け */
 @media (max-width: 768px) {
-    .input-group {
-        grid-template-columns: 1fr;
+    body {
+        padding: 15px;
+    }
+
+    .container {
+        padding: 0;
+    }
+
+    section {
+        padding: 25px 20px;
+        margin-bottom: 20px;
     }
 
     h1 {
-        font-size: 1.8em;
+        font-size: 2em;
+        margin-bottom: 20px;
+    }
+
+    h2 {
+        font-size: 1.5em;
+    }
+
+    .input-group {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    button {
+        padding: 12px 30px;
+        font-size: 1.05em;
+    }
+
+    .action-buttons {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .action-btn {
+        padding: 14px 25px;
+        font-size: 1em;
+        flex: 1 1 calc(50% - 5px);
+        min-width: 140px;
+    }
+
+    .generate-btn {
+        font-size: 1.2em;
+        padding: 16px 35px;
+    }
+
+    .haiku-display {
+        padding: 35px 25px;
     }
 
     .haiku-line {
-        font-size: 1.5em;
+        font-size: 1.6em;
+        margin: 15px 0;
     }
 
     .word-lists {
@@ -412,14 +459,162 @@ button:active {
 
     .room-input-group {
         flex-direction: column;
+        gap: 12px;
     }
 
     .room-input-group input {
         max-width: 100%;
+        width: 100%;
+    }
+
+    .join-btn {
+        width: 100%;
+        padding: 14px 30px;
     }
 
     .current-room-info {
         flex-direction: column;
         gap: 10px;
+        padding: 12px 20px;
+    }
+}
+
+/* スマホ向け (小さい画面) */
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    section {
+        padding: 20px 15px;
+        margin-bottom: 15px;
+        border-radius: 15px;
+    }
+
+    h1 {
+        font-size: 1.6em;
+        margin-bottom: 15px;
+    }
+
+    h2 {
+        font-size: 1.3em;
+        margin-bottom: 15px;
+    }
+
+    h3 {
+        font-size: 1.1em;
+    }
+
+    /* すべてのボタンを大きく、タッチしやすく */
+    button {
+        padding: 14px 25px;
+        font-size: 1.1em;
+        min-height: 48px; /* タッチ操作の推奨最小サイズ */
+        border-radius: 10px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .action-btn {
+        width: 100%;
+        padding: 16px 20px;
+        font-size: 1.05em;
+        min-height: 50px;
+    }
+
+    .generate-btn {
+        font-size: 1.3em;
+        padding: 18px 40px;
+        margin-bottom: 25px;
+        width: 100%;
+        min-height: 56px;
+    }
+
+    /* 入力フィールドも大きく */
+    input[type="text"] {
+        padding: 14px 15px;
+        font-size: 1.05em;
+        min-height: 48px;
+    }
+
+    select {
+        padding: 14px 15px;
+        font-size: 1.05em;
+        min-height: 48px;
+    }
+
+    .input-group {
+        gap: 12px;
+    }
+
+    /* 俳句表示エリア */
+    .haiku-display {
+        padding: 30px 20px;
+        border-radius: 15px;
+    }
+
+    .haiku-line {
+        font-size: 1.4em;
+        margin: 12px 0;
+        letter-spacing: 0.1em;
+    }
+
+    /* 言葉リスト */
+    .word-list {
+        padding: 15px;
+    }
+
+    .word-list li {
+        padding: 14px 12px;
+        margin-bottom: 10px;
+    }
+
+    .word-text {
+        font-size: 1.05em;
+    }
+
+    .delete-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1.3em;
+        flex-shrink: 0; /* ボタンが縮まないように */
+    }
+
+    /* ルーム関連 */
+    .room-input-group {
+        gap: 12px;
+    }
+
+    .room-input-group label {
+        font-size: 1em;
+    }
+
+    .join-btn {
+        font-size: 1.1em;
+        padding: 16px 30px;
+        min-height: 52px;
+    }
+
+    .leave-btn {
+        padding: 10px 20px;
+        font-size: 1em;
+        min-height: 44px;
+    }
+
+    .current-room-info {
+        padding: 15px;
+        font-size: 0.95em;
+    }
+
+    .current-room-info span {
+        font-size: 1.2em;
+    }
+
+    /* 文字数カウント */
+    .word-count {
+        font-size: 0.95em;
     }
 }
