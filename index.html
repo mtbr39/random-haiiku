@@ -10,6 +10,23 @@
     <div class="container">
         <h1>ランダム俳句ジェネレーター</h1>
 
+        <!-- ルーム選択セクション -->
+        <section class="room-selector" id="room-selector">
+            <h2>ルームを選択</h2>
+            <div class="room-input-group">
+                <label for="room-id-input">ルーム番号:</label>
+                <input type="text" id="room-id-input" placeholder="例: 1234" maxlength="6">
+                <button onclick="joinRoom()" class="join-btn">ルームに参加</button>
+            </div>
+            <p class="room-hint">同じルーム番号を入力すると、みんなで言葉を共有できます</p>
+        </section>
+
+        <!-- 現在のルーム情報 -->
+        <div class="current-room-info" id="current-room-info" style="display: none;">
+            <p>現在のルーム: <span id="current-room-number"></span></p>
+            <button onclick="leaveRoom()" class="leave-btn">ルームを変更</button>
+        </div>
+
         <!-- 俳句生成セクション -->
         <section class="haiku-generator">
             <h2>俳句を生成</h2>
@@ -60,6 +77,6 @@
         </section>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>

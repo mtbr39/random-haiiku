@@ -1,7 +1,20 @@
-// 言葉を保存するデータ構造
+import {
+  createOrGetRoom,
+  getRoomData,
+  addWordToRoom,
+  removeWordFromRoom,
+  watchRoom,
+  stopWatchingRoom,
+  clearAllWordsInRoom,
+  addDefaultWordsToRoom,
+  setCurrentRoom,
+  getCurrentRoom
+} from './firestore.js';
+
+// 言葉を保存するデータ構造（Firestoreから同期）
 const wordDatabase = {
-    '5': [],  // 5文字
-    '7': []   // 7文字
+    '5': [],
+    '7': []
 };
 
 // 使用済みの言葉を記録
@@ -9,22 +22,6 @@ const usedWords = {
     '5': [],
     '7': []
 };
-
-// LocalStorageから言葉を読み込む
-function loadWords() {
-    const saved = localStorage.getItem('haikuWords');
-    if (saved) {
-        const loaded = JSON.parse(saved);
-        // 旧データとの互換性を保つ
-        if (loaded['5-1'] || loaded['5-2']) {
-            wordDatabase['5'] = [...(loaded['5-1'] || []), ...(loaded['5-2'] || []), ...(loaded['5'] || [])];
-        } else {
-            wordDatabase['5'] = loaded['5'] || [];
-        }
-        wordDatabase['7'] = loaded['7'] || [];
-    }
-    displayAllWords();
-}
 
 // デフォルトの言葉を取得
 function getDefaultWords() {
@@ -60,42 +57,110 @@ function getDefaultWords() {
     };
 }
 
-// デフォルトの言葉を追加
-function addDefaultWords() {
-    const defaults = getDefaultWords();
+// ルームに参加
+window.joinRoom = async function() {
+    const input = document.getElementById('room-id-input');
+    const roomId = input.value.trim();
 
-    // 重複を避けて追加
-    defaults['5'].forEach(word => {
-        if (!wordDatabase['5'].includes(word)) {
-            wordDatabase['5'].push(word);
+    if (!roomId) {
+        alert('ルーム番号を入力してください');
+        return;
+    }
+
+    // 数字のみを許可
+    if (!/^\d+$/.test(roomId)) {
+        alert('ルーム番号は数字のみで入力してください');
+        return;
+    }
+
+    try {
+        // ルームを作成または取得
+        await createOrGetRoom(roomId);
+        setCurrentRoom(roomId);
+
+        // UIを更新
+        document.getElementById('room-selector').style.display = 'none';
+        document.getElementById('current-room-info').style.display = 'block';
+        document.getElementById('current-room-number').textContent = roomId;
+
+        // ルームのデータを監視
+        watchRoom(roomId, (data) => {
+            if (data && data.words) {
+                wordDatabase['5'] = data.words['5'] || [];
+                wordDatabase['7'] = data.words['7'] || [];
+                displayAllWords();
+            }
+        });
+
+        // 初期データを読み込み
+        const roomData = await getRoomData(roomId);
+        if (roomData && roomData.words) {
+            wordDatabase['5'] = roomData.words['5'] || [];
+            wordDatabase['7'] = roomData.words['7'] || [];
+            displayAllWords();
         }
-    });
 
-    defaults['7'].forEach(word => {
-        if (!wordDatabase['7'].includes(word)) {
-            wordDatabase['7'].push(word);
-        }
-    });
+    } catch (error) {
+        console.error('ルームへの参加に失敗しました:', error);
+        alert('ルームへの参加に失敗しました。もう一度お試しください。');
+    }
+};
 
-    saveWords();
+// ルームから退出
+window.leaveRoom = function() {
+    stopWatchingRoom();
+    setCurrentRoom(null);
+
+    // UIを更新
+    document.getElementById('room-selector').style.display = 'block';
+    document.getElementById('current-room-info').style.display = 'none';
+    document.getElementById('room-id-input').value = '';
+
+    // ローカルデータをクリア
+    wordDatabase['5'] = [];
+    wordDatabase['7'] = [];
     displayAllWords();
-}
+};
+
+// デフォルトの言葉を追加
+window.addDefaultWords = async function() {
+    const roomId = getCurrentRoom();
+    if (!roomId) {
+        alert('先にルームに参加してください');
+        return;
+    }
+
+    const defaults = getDefaultWords();
+    const success = await addDefaultWordsToRoom(roomId, defaults);
+
+    if (success) {
+        // データはwatchRoomで自動的に更新される
+    } else {
+        alert('デフォルトの言葉の追加に失敗しました');
+    }
+};
 
 // すべての言葉を削除
-function clearAllWords() {
+window.clearAllWords = async function() {
+    const roomId = getCurrentRoom();
+    if (!roomId) {
+        alert('先にルームに参加してください');
+        return;
+    }
+
     if (!confirm('すべての言葉を削除しますか？')) {
         return;
     }
 
-    wordDatabase['5'] = [];
-    wordDatabase['7'] = [];
+    const success = await clearAllWordsInRoom(roomId);
 
-    saveWords();
-    displayAllWords();
-}
+    if (!success) {
+        alert('言葉の削除に失敗しました');
+    }
+};
 
 // 言葉リストの表示/非表示を切り替え
-function toggleWordLists() {
+window.toggleWordLists = function() {
     const words5 = document.getElementById('words-5');
     const words7 = document.getElementById('words-7');
     const toggleBtn = document.getElementById('toggle-btn');
@@ -109,28 +174,28 @@ function toggleWordLists() {
         words7.classList.add('hidden');
         toggleBtn.textContent = '言葉リストを表示';
     }
-}
+};
 
 // 使用済みの言葉をリセット
-function resetUsedWords() {
+window.resetUsedWords = function() {
     usedWords['5'] = [];
     usedWords['7'] = [];
     displayAllWords();
-}
-
-// LocalStorageに言葉を保存
-function saveWords() {
-    localStorage.setItem('haikuWords', JSON.stringify(wordDatabase));
-}
+};
 
 // 文字数をカウント（字余り・字足らず許容）
 function countCharacters(text) {
-    // 句読点や記号は文字数に含めない
-    return text.replace(/[、。！？・\s]/g, '').length;
+    return text.replace(/[、。!?・\s]/g, '').length;
 }
 
 // 言葉を追加
-function addWord() {
+window.addWord = async function() {
+    const roomId = getCurrentRoom();
+    if (!roomId) {
+        alert('先にルームに参加してください');
+        return;
+    }
+
     const input = document.getElementById('word-input');
     const typeSelect = document.getElementById('syllable-type');
 
@@ -143,27 +208,37 @@ function addWord() {
 
     // 重複チェック
     if (wordDatabase[type].includes(word)) {
+        alert('この言葉は既に登録されています');
+        input.value = '';
+        input.focus();
         return;
     }
 
-    wordDatabase[type].push(word);
-    saveWords();
-    displayWords(type);
+    const success = await addWordToRoom(roomId, type, word);
 
-    // 入力欄をクリア
-    input.value = '';
-    input.focus();
-}
+    if (success) {
+        // データはwatchRoomで自動的に更新される
+        input.value = '';
+        input.focus();
+    } else {
+        alert('言葉の追加に失敗しました');
+    }
+};
 
 // 言葉を削除
-function deleteWord(type, word) {
-    const index = wordDatabase[type].indexOf(word);
-    if (index > -1) {
-        wordDatabase[type].splice(index, 1);
-        saveWords();
-        displayWords(type);
+window.deleteWord = async function(type, word) {
+    const roomId = getCurrentRoom();
+    if (!roomId) {
+        alert('先にルームに参加してください');
+        return;
     }
-}
+
+    const success = await removeWordFromRoom(roomId, type, word);
+
+    if (!success) {
+        alert('言葉の削除に失敗しました');
+    }
+};
 
 // 特定のタイプの言葉を表示
 function displayWords(type) {
@@ -224,7 +299,13 @@ function getRandomWord(type) {
 }
 
 // 俳句を生成
-function generateHaiku() {
+window.generateHaiku = function() {
+    const roomId = getCurrentRoom();
+    if (!roomId) {
+        alert('先にルームに参加してください');
+        return;
+    }
+
     const line1 = getRandomWord('5');
     const line2 = getRandomWord('7');
     const line3 = getRandomWord('5');
@@ -235,12 +316,18 @@ function generateHaiku() {
 
     // 使用済みの言葉を表示するために、リストを更新
     displayAllWords();
-}
+};
 
 // Enterキーで追加
 document.addEventListener('DOMContentLoaded', () => {
-    loadWords();
+    // ルーム番号入力でEnterキー
+    document.getElementById('room-id-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            joinRoom();
+        }
+    });
 
+    // 言葉入力でEnterキー
     document.getElementById('word-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             addWord();
